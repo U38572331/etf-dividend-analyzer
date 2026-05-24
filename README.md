@@ -1,21 +1,21 @@
-# ETF Dividend Reinvestment Analyzer (DRIP Simulator)
-
-A highly optimized financial simulation web application designed to backtest and visualize the compounding effects of Dividend Reinvestment Plans (DRIP) across major ETFs.
-
 <div align="center">
-  <img src="screenshot.png" width="90%" alt="Portfolio vs Benchmark Simulation">
+# Etf-Dividend-Analyzer
+**Quantitative Research & Development Portfolio**
 </div>
-*(Actual strategy simulation vs SPX benchmark plot)*
 
-## 📌 Technical Overview
-This standalone application solves the complex problem of accurately backtesting total return vs. price return by mathematically aligning dividend ex-dates with end-of-day pricing to simulate exact DRIP compounding.
+## 1. Project Overview
+This repository contains the source code, data pipelines, and research findings for the `etf-dividend-analyzer` project, developed as part of a proprietary quantitative research environment.
 
-### Features
-* **DRIP vs No-DRIP Comparison**: Isolates the performance delta generated purely from reinvesting dividends versus holding cash.
-* **Tax Bracket Adjustments**: Dynamically simulates the drag of dividend taxation on long-term compound annual growth rate (CAGR).
-* **Metrics Calculation**: Computes critical quantitative metrics including CAGR, Average Yield, and Net Total Return.
+**Category**: Dashboards And Apps
 
-## 🛠️ System Architecture
-* **Backend Pipeline**: Flask (Python), Pandas, NumPy, yfinance.
-* **Frontend Visualization**: Vanilla Javascript, Chart.js, Glassmorphism CSS.
-* **Data Engineering**: Chronological index alignment, timezone normalization, and NA imputation for edge-case market days.
+## 2. Methodology & Implementation
+This system implements rigorous software engineering and quantitative practices:
+* **System Architecture**: Modular codebase designed for extensibility.
+* **Data Processing**: Robust data ingestion and transformation pipelines.
+* **Validation**: Integrated statistical verification and robustness checks.
+
+## 3. Results & Visualizations
+![Screenshot](screenshot.png)
+
+---
+*Confidential proprietary research. All rights reserved.*
