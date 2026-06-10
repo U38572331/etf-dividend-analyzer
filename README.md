@@ -34,9 +34,9 @@ python app.py
 
 ## Architecture
 
-- **Backend**: Python, Flask
+- **Frontend/GUI**: PyQt6
 - **Data Processing**: Pandas, NumPy, yfinance
-- **Frontend**: HTML, CSS, JavaScript
+- **Visualization**: Matplotlib
 - **Distribution**: PyInstaller
 
 ## Documentation
@@ -77,10 +77,10 @@ python app.py
 
 ## 系統架構
 
-- **後端**：Python, Flask
-- **資料處理**：Pandas, NumPy, yfinance
-- **前端**：HTML, CSS, JavaScript
-- **封裝發佈**：PyInstaller
+- **前端介面**: PyQt6
+- **資料處理**: Pandas, NumPy, yfinance
+- **數據視覺化**: Matplotlib
+- **封裝發佈**: PyInstaller
 
 ## 系統介面
 
