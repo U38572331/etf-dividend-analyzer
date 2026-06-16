@@ -5,18 +5,114 @@ import pandas as pd
 from datetime import datetime, date, timedelta
 
 from PyQt6.QtWidgets import (
-    QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
+    QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
     QLabel, QLineEdit, QDoubleSpinBox, QDateEdit, QPushButton, 
-    QTextEdit, QSplitter, QMessageBox, QGroupBox, QFormLayout
+    QMessageBox, QFrame, QScrollArea, QSizePolicy
 )
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QDate
-from PyQt6.QtGui import QFont
+from PyQt6.QtGui import QFont, QColor
 
 import matplotlib
 matplotlib.use('qtagg')
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qtagg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
+
+# --- Theme Constants (UI UX Pro Max: Fintech Dashboard) ---
+BG_COLOR = "#F8FAFC"
+CARD_BG = "#FFFFFF"
+PRIMARY_COLOR = "#1E40AF"
+SECONDARY_COLOR = "#3B82F6"
+ACCENT_COLOR = "#D97706"
+TEXT_COLOR = "#1E3A8A"
+MUTED_TEXT = "#64748B"
+BORDER_COLOR = "#DBEAFE"
+
+STYLESHEET = f"""
+QMainWindow, QWidget#MainContent {{
+    background-color: {BG_COLOR};
+}}
+
+QFrame#Card {{
+    background-color: {CARD_BG};
+    border: 1px solid {BORDER_COLOR};
+    border-radius: 8px;
+}}
+
+QLabel {{
+    color: {TEXT_COLOR};
+    font-family: "Segoe UI", "Fira Sans", sans-serif;
+}}
+
+QLabel#HeaderTitle {{
+    font-size: 24px;
+    font-weight: bold;
+    color: {PRIMARY_COLOR};
+    padding-bottom: 5px;
+}}
+
+QLabel#HeaderSubtitle {{
+    font-size: 13px;
+    color: {MUTED_TEXT};
+}}
+
+QLabel#CardTitle {{
+    font-size: 16px;
+    font-weight: 600;
+    color: {PRIMARY_COLOR};
+    padding-bottom: 10px;
+    border-bottom: 1px solid {BORDER_COLOR};
+    margin-bottom: 10px;
+}}
+
+QLabel#InputLabel {{
+    font-size: 13px;
+    font-weight: 500;
+}}
+
+QLabel#KpiValue {{
+    font-size: 16px;
+    font-weight: bold;
+    font-family: "Consolas", "Fira Code", monospace;
+    color: {TEXT_COLOR};
+}}
+
+QLabel#KpiLabel {{
+    font-size: 12px;
+    color: {MUTED_TEXT};
+}}
+
+QLineEdit, QDoubleSpinBox, QDateEdit {{
+    background-color: {CARD_BG};
+    border: 1px solid {BORDER_COLOR};
+    border-radius: 4px;
+    padding: 6px;
+    color: {TEXT_COLOR};
+    font-size: 13px;
+}}
+
+QLineEdit:focus, QDoubleSpinBox:focus, QDateEdit:focus {{
+    border: 2px solid {SECONDARY_COLOR};
+}}
+
+QPushButton#RunButton {{
+    background-color: {PRIMARY_COLOR};
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 10px;
+    font-size: 14px;
+    font-weight: bold;
+}}
+
+QPushButton#RunButton:hover {{
+    background-color: {SECONDARY_COLOR};
+}}
+
+QPushButton#RunButton:disabled {{
+    background-color: {MUTED_TEXT};
+}}
+"""
 
 class AnalyzerWorker(QThread):
     finished = pyqtSignal(dict)
@@ -145,82 +241,184 @@ class AnalyzerWorker(QThread):
 
 class MplCanvas(FigureCanvas):
     def __init__(self, parent=None, width=5, height=4, dpi=100):
-        self.fig = Figure(figsize=(width, height), dpi=dpi)
+        self.fig = Figure(figsize=(width, height), dpi=dpi, facecolor=CARD_BG)
         self.ax = self.fig.add_subplot(111)
+        self.ax.set_facecolor(CARD_BG)
+        self.ax.tick_params(colors=MUTED_TEXT)
+        self.ax.spines['bottom'].set_color(BORDER_COLOR)
+        self.ax.spines['top'].set_color(BORDER_COLOR)
+        self.ax.spines['right'].set_color(BORDER_COLOR)
+        self.ax.spines['left'].set_color(BORDER_COLOR)
         super().__init__(self.fig)
         self.setParent(parent)
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("ETF Dividend Analyzer")
-        self.resize(1000, 700)
+        self.setWindowTitle("ETF Dividend Analyzer - Pro Max")
+        self.resize(1100, 750)
+        self.setStyleSheet(STYLESHEET)
         
         main_widget = QWidget()
+        main_widget.setObjectName("MainContent")
         self.setCentralWidget(main_widget)
-        layout = QHBoxLayout(main_widget)
         
-        # Left Panel (Inputs)
+        main_layout = QVBoxLayout(main_widget)
+        main_layout.setContentsMargins(20, 20, 20, 20)
+        main_layout.setSpacing(20)
+        
+        # --- HEADER ---
+        header_layout = QVBoxLayout()
+        header_layout.setSpacing(0)
+        title = QLabel("ETF Dividend Analyzer")
+        title.setObjectName("HeaderTitle")
+        subtitle = QLabel("Financial Analytics Dashboard • DRIP Performance Comparison")
+        subtitle.setObjectName("HeaderSubtitle")
+        header_layout.addWidget(title)
+        header_layout.addWidget(subtitle)
+        main_layout.addLayout(header_layout)
+        
+        # --- BODY ---
+        body_layout = QHBoxLayout()
+        body_layout.setSpacing(20)
+        
+        # Left Panel
         left_panel = QWidget()
+        left_panel.setFixedWidth(340)
         left_layout = QVBoxLayout(left_panel)
-        left_panel.setFixedWidth(300)
+        left_layout.setContentsMargins(0, 0, 0, 0)
+        left_layout.setSpacing(20)
         
-        input_group = QGroupBox("Simulation Parameters")
-        form_layout = QFormLayout(input_group)
+        # 1. Inputs Card
+        input_card = QFrame()
+        input_card.setObjectName("Card")
+        input_layout = QVBoxLayout(input_card)
+        input_layout.setContentsMargins(20, 20, 20, 20)
+        input_layout.setSpacing(15)
         
-        self.ticker_input = QLineEdit("SPY")
+        card_title = QLabel("Simulation Parameters")
+        card_title.setObjectName("CardTitle")
+        input_layout.addWidget(card_title)
         
-        self.capital_input = QDoubleSpinBox()
+        self.ticker_input = self.create_input("Ticker Symbol:", QLineEdit("SPY"), input_layout)
+        self.capital_input = self.create_input("Initial Capital ($):", QDoubleSpinBox(), input_layout)
         self.capital_input.setRange(100, 100000000)
         self.capital_input.setValue(10000)
-        self.capital_input.setPrefix("$ ")
         
-        self.tax_input = QDoubleSpinBox()
+        self.tax_input = self.create_input("Dividend Tax Rate (%):", QDoubleSpinBox(), input_layout)
         self.tax_input.setRange(0, 100)
         self.tax_input.setValue(30.0)
-        self.tax_input.setSuffix(" %")
         
-        self.start_date_input = QDateEdit()
+        self.start_date_input = self.create_input("Start Date:", QDateEdit(), input_layout)
         self.start_date_input.setCalendarPopup(True)
         self.start_date_input.setDate(QDate.currentDate().addYears(-5))
         
-        self.end_date_input = QDateEdit()
+        self.end_date_input = self.create_input("End Date:", QDateEdit(), input_layout)
         self.end_date_input.setCalendarPopup(True)
         self.end_date_input.setDate(QDate.currentDate())
         
-        form_layout.addRow("Ticker Symbol:", self.ticker_input)
-        form_layout.addRow("Initial Capital:", self.capital_input)
-        form_layout.addRow("Dividend Tax Rate:", self.tax_input)
-        form_layout.addRow("Start Date:", self.start_date_input)
-        form_layout.addRow("End Date:", self.end_date_input)
-        
         self.run_btn = QPushButton("Run Analysis")
-        self.run_btn.setFixedHeight(40)
+        self.run_btn.setObjectName("RunButton")
+        self.run_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.run_btn.clicked.connect(self.run_analysis)
+        input_layout.addWidget(self.run_btn)
         
-        left_layout.addWidget(input_group)
-        left_layout.addWidget(self.run_btn)
+        left_layout.addWidget(input_card)
         
-        self.results_text = QTextEdit()
-        self.results_text.setReadOnly(True)
-        self.results_text.setFont(QFont("Consolas", 10))
-        left_layout.addWidget(QLabel("Metrics:"))
-        left_layout.addWidget(self.results_text)
+        # 2. Metrics Card
+        self.metrics_card = QFrame()
+        self.metrics_card.setObjectName("Card")
+        metrics_layout = QVBoxLayout(self.metrics_card)
+        metrics_layout.setContentsMargins(20, 20, 20, 20)
+        
+        metrics_title = QLabel("Performance KPIs")
+        metrics_title.setObjectName("CardTitle")
+        metrics_layout.addWidget(metrics_title)
+        
+        self.kpi_grid = QGridLayout()
+        self.kpi_grid.setVerticalSpacing(15)
+        self.kpi_grid.setHorizontalSpacing(10)
+        metrics_layout.addLayout(self.kpi_grid)
+        
+        # Initialize empty KPIs
+        self.kpi_labels = {}
+        self.setup_kpis()
+        
+        left_layout.addWidget(self.metrics_card)
+        left_layout.addStretch() # Push everything up
         
         # Right Panel (Chart)
-        right_panel = QWidget()
+        right_panel = QFrame()
+        right_panel.setObjectName("Card")
         right_layout = QVBoxLayout(right_panel)
+        right_layout.setContentsMargins(15, 15, 15, 15)
+        
+        chart_title = QLabel("Value Growth Projection")
+        chart_title.setObjectName("CardTitle")
+        right_layout.addWidget(chart_title)
         
         self.canvas = MplCanvas(self, width=6, height=5, dpi=100)
         self.toolbar = NavigationToolbar(self.canvas, self)
+        self.toolbar.setStyleSheet("background: transparent; border: none;")
         
         right_layout.addWidget(self.toolbar)
         right_layout.addWidget(self.canvas)
         
-        layout.addWidget(left_panel)
-        layout.addWidget(right_panel)
+        body_layout.addWidget(left_panel)
+        body_layout.addWidget(right_panel, stretch=1)
         
+        main_layout.addLayout(body_layout)
         self.worker = None
+
+    def create_input(self, label_text, widget, parent_layout):
+        layout = QVBoxLayout()
+        layout.setSpacing(5)
+        lbl = QLabel(label_text)
+        lbl.setObjectName("InputLabel")
+        layout.addWidget(lbl)
+        layout.addWidget(widget)
+        parent_layout.addLayout(layout)
+        return widget
+
+    def setup_kpis(self):
+        # DRIP Column (0, 1), Non-DRIP Column (2, 3)
+        headers = ["DRIP Strategy", "Non-DRIP (Cash)"]
+        for col, title in enumerate(headers):
+            lbl = QLabel(title)
+            lbl.setStyleSheet(f"font-weight: bold; color: {PRIMARY_COLOR if col==0 else ACCENT_COLOR}; font-size: 13px;")
+            self.kpi_grid.addWidget(lbl, 0, col, 1, 1)
+
+        kpi_names = ["Final Value", "CAGR", "Gross Divs", "Tax Paid"]
+        self.kpi_keys = ["final", "cagr", "divs", "tax"]
+        
+        for row, name in enumerate(kpi_names, start=1):
+            # DRIP
+            v_drip = QLabel("-")
+            v_drip.setObjectName("KpiValue")
+            l_drip = QLabel(name)
+            l_drip.setObjectName("KpiLabel")
+            
+            # Non-DRIP
+            v_nodrip = QLabel("-")
+            v_nodrip.setObjectName("KpiValue")
+            l_nodrip = QLabel(name)
+            l_nodrip.setObjectName("KpiLabel")
+            
+            # Add to grid
+            vbox1 = QVBoxLayout()
+            vbox1.setSpacing(2)
+            vbox1.addWidget(v_drip)
+            vbox1.addWidget(l_drip)
+            self.kpi_grid.addLayout(vbox1, row, 0)
+            
+            vbox2 = QVBoxLayout()
+            vbox2.setSpacing(2)
+            vbox2.addWidget(v_nodrip)
+            vbox2.addWidget(l_nodrip)
+            self.kpi_grid.addLayout(vbox2, row, 1)
+            
+            self.kpi_labels[f"drip_{self.kpi_keys[row-1]}"] = v_drip
+            self.kpi_labels[f"nodrip_{self.kpi_keys[row-1]}"] = v_nodrip
 
     def run_analysis(self):
         ticker = self.ticker_input.text()
@@ -230,9 +428,12 @@ class MainWindow(QMainWindow):
         end_date = self.end_date_input.date().toString("yyyy-MM-dd")
         
         self.run_btn.setEnabled(False)
-        self.run_btn.setText("Fetching Data...")
-        self.results_text.clear()
+        self.run_btn.setText("Computing...")
         
+        # Reset KPIs
+        for k, v in self.kpi_labels.items():
+            v.setText("...")
+            
         self.worker = AnalyzerWorker(ticker, capital, tax_rate, start_date, end_date)
         self.worker.finished.connect(self.on_analysis_finished)
         self.worker.error.connect(self.on_analysis_error)
@@ -244,40 +445,31 @@ class MainWindow(QMainWindow):
         
         # Update Plot
         self.canvas.ax.clear()
-        self.canvas.ax.plot(res["dates"], res["dripHistory"], label="DRIP (Reinvested)", color="blue", linewidth=2)
-        self.canvas.ax.plot(res["dates"], res["nodripHistory"], label="Non-DRIP (Cash Out)", color="red", linewidth=2)
+        self.canvas.ax.plot(res["dates"], res["dripHistory"], label="DRIP (Reinvested)", color=PRIMARY_COLOR, linewidth=2.5)
+        self.canvas.ax.plot(res["dates"], res["nodripHistory"], label="Non-DRIP (Cash Out)", color=ACCENT_COLOR, linewidth=2)
         
-        self.canvas.ax.set_title(f"{res['ticker']} Dividend Reinvestment Analysis", fontsize=12)
-        self.canvas.ax.set_xlabel("Date")
-        self.canvas.ax.set_ylabel("Portfolio Value ($)")
-        self.canvas.ax.legend()
-        self.canvas.ax.grid(True, linestyle='--', alpha=0.7)
-        
+        self.canvas.ax.set_ylabel("Portfolio Value ($)", color=TEXT_COLOR)
+        self.canvas.ax.legend(frameon=True, facecolor=CARD_BG, edgecolor=BORDER_COLOR, labelcolor=TEXT_COLOR)
+        self.canvas.ax.grid(True, linestyle='--', color=BORDER_COLOR, alpha=0.8)
         self.canvas.fig.tight_layout()
         self.canvas.draw()
         
         # Update Metrics
-        metrics = f"""
-=== {res['ticker']} Analysis ===
-Years Analyzed: {res['years']:.2f}
-
-[ DRIP Strategy ]
-Final Value: ${res['drip_final']:,.2f}
-CAGR: {res['drip_cagr']*100:.2f}%
-Gross Dividends: ${res['drip_divs']:,.2f}
-Tax Paid: ${res['drip_tax']:,.2f}
-
-[ Non-DRIP Strategy ]
-Final Value: ${res['nodrip_final']:,.2f}
-CAGR: {res['nodrip_cagr']*100:.2f}%
-Gross Dividends: ${res['nodrip_divs']:,.2f}
-Tax Paid: ${res['nodrip_tax']:,.2f}
-"""
-        self.results_text.setText(metrics.strip())
+        self.kpi_labels["drip_final"].setText(f"${res['drip_final']:,.0f}")
+        self.kpi_labels["drip_cagr"].setText(f"{res['drip_cagr']*100:.2f}%")
+        self.kpi_labels["drip_divs"].setText(f"${res['drip_divs']:,.0f}")
+        self.kpi_labels["drip_tax"].setText(f"${res['drip_tax']:,.0f}")
+        
+        self.kpi_labels["nodrip_final"].setText(f"${res['nodrip_final']:,.0f}")
+        self.kpi_labels["nodrip_cagr"].setText(f"{res['nodrip_cagr']*100:.2f}%")
+        self.kpi_labels["nodrip_divs"].setText(f"${res['nodrip_divs']:,.0f}")
+        self.kpi_labels["nodrip_tax"].setText(f"${res['nodrip_tax']:,.0f}")
 
     def on_analysis_error(self, err_msg):
         self.run_btn.setEnabled(True)
         self.run_btn.setText("Run Analysis")
+        for k, v in self.kpi_labels.items():
+            v.setText("-")
         QMessageBox.critical(self, "Error", f"Failed to analyze:\n{err_msg}")
 
 if __name__ == "__main__":
