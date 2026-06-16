@@ -18,15 +18,15 @@ from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qtagg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 
-# --- Theme Constants (UI UX Pro Max: Fintech Dashboard) ---
-BG_COLOR = "#F8FAFC"
-CARD_BG = "#FFFFFF"
-PRIMARY_COLOR = "#1E40AF"
-SECONDARY_COLOR = "#3B82F6"
-ACCENT_COLOR = "#D97706"
-TEXT_COLOR = "#1E3A8A"
-MUTED_TEXT = "#64748B"
-BORDER_COLOR = "#DBEAFE"
+# --- Theme Constants (UI UX Pro Max: Premium Dark Mode OLED) ---
+BG_COLOR = "#020617"
+CARD_BG = "#0F172A"
+PRIMARY_COLOR = "#3B82F6"
+SECONDARY_COLOR = "#1D4ED8"
+ACCENT_COLOR = "#22C55E"
+TEXT_COLOR = "#F8FAFC"
+MUTED_TEXT = "#94A3B8"
+BORDER_COLOR = "#334155"
 
 STYLESHEET = f"""
 QMainWindow, QWidget#MainContent {{
