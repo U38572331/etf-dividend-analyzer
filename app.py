@@ -166,6 +166,7 @@ class AnalyzerWorker(QThread):
 
             df['dividend'] = div_series
             df['dividend'] = df['dividend'].fillna(0.0)
+            df = df.dropna(subset=['close'])
             df = df.sort_index()
 
             drip_shares = self.capital / df['close'].iloc[0]
